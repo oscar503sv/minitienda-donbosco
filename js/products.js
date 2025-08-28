@@ -5,7 +5,9 @@ const products = [
         brand: "Don Frijol",
         image: "./img/frijoles.webp",
         originalPrice: "$2.00 libra",
-        discountPrice: "$1.50"
+        discountPrice: "$1.50",
+        stock: 15,
+        unit: "libras"
     },
     {
         id: 2,
@@ -13,7 +15,9 @@ const products = [
         brand: "Del cañal",
         image: "./img/Azucar.webp",
         originalPrice: "$0.80 2 libras",
-        discountPrice: "$0.65"
+        discountPrice: "$0.65",
+        stock: 20,
+        unit: "2 libras"
     },
     {
         id: 3,
@@ -21,7 +25,9 @@ const products = [
         brand: "Don chef",
         image: "./img/spaguettis2.webp",
         originalPrice: "$1.00 3pack",
-        discountPrice: "$0.90"
+        discountPrice: "$0.90",
+        stock: 30,
+        unit: "3pack"
     },
     {
         id: 4,
@@ -29,7 +35,9 @@ const products = [
         brand: "San Francisco",
         image: "./img/arroz.webp",
         originalPrice: "$0.80 2 libras",
-        discountPrice: "$0.65"
+        discountPrice: "$0.65",
+        stock: 25,
+        unit: "2 libras"
     },
     {
         id: 5,
@@ -37,7 +45,9 @@ const products = [
         brand: "Variedad",
         image: "./img/verduras.webp",
         originalPrice: "$0.60 unidad",
-        discountPrice: "$0.35"
+        discountPrice: "$0.35",
+        stock: 40,
+        unit: "unidad"
     },
     {
         id: 6,
@@ -45,7 +55,9 @@ const products = [
         brand: "Variedad",
         image: "./img/lacteos.webp",
         originalPrice: "$2.00 unidad",
-        discountPrice: "$1.75"
+        discountPrice: "$1.75",
+        stock: 18,
+        unit: "unidad"
     },
     {
         id: 10,
@@ -53,7 +65,9 @@ const products = [
         brand: "Scott",
         image: "./img/papel.webp",
         originalPrice: "$9.99 24pck",
-        discountPrice: "$6.99"
+        discountPrice: "$6.99",
+        stock: 12,
+        unit: "12pack"
     },
     {
         id: 11,
@@ -61,7 +75,9 @@ const products = [
         brand: "Variado",
         image: "./img/articulos de limpieza.webp",
         originalPrice: "$3.00 unidad",
-        discountPrice: "$2.25"
+        discountPrice: "$2.25",
+        stock: 22,
+        unit: "unidad"
     },
     {
         id: 12,
@@ -69,6 +85,8 @@ const products = [
         brand: "Variedad",
         image: "./img/pan.webp",
         originalPrice: "$0.75 unidad",
-        discountPrice: "$0.50"
+        discountPrice: "$0.50",
+        stock: 35,
+        unit: "unidad"
     }
 ];
