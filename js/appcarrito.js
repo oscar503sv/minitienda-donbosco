@@ -34,6 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
 // Función para cargar productos
 function cargarProductos() {
     products.forEach(producto => {
+        // Calcular stock disponible
+        const cantidadEnCarrito = obtenerCantidadEnCarrito(producto.id);
+        const stockDisponible = producto.stock - cantidadEnCarrito;
+        
         const div = document.createElement('div');
         div.className = 'product-card';
         div.innerHTML = `
@@ -46,8 +50,16 @@ function cargarProductos() {
                         <span class="original-price">${producto.originalPrice}</span>
                         <span class="discount-price">Ahora ${producto.discountPrice}</span>
                     </div>
-                    <button class="button button-primary agregar-carrito" data-id="${producto.id}">
-                        Agregar Al Carrito
+                    <div class="stock-info ${stockDisponible <= 5 ? 'stock-bajo' : ''}">
+                        ${stockDisponible > 0 
+                            ? `<span>Stock disponible: ${stockDisponible} ${producto.unit}</span>`
+                            : '<span class="agotado">Agotado</span>'
+                        }
+                    </div>
+                    <button class="button button-primary agregar-carrito ${stockDisponible === 0 ? 'disabled' : ''}" 
+                            data-id="${producto.id}" 
+                            ${stockDisponible === 0 ? 'disabled' : ''}>
+                        ${stockDisponible === 0 ? 'Agotado' : 'Agregar Al Carrito'}
                     </button>
                 </div>
             </div>
@@ -87,13 +99,17 @@ function modificarCantidad(productoId, cambio) {
         // Si la cantidad llega a 0, eliminar el producto
         productosCarrito = productosCarrito.filter(item => item.id !== productoId);
         mostrarNotificacion('Producto eliminado del carrito', 'error');
-    } else {
-        // Actualizar cantidad
+    } else if (nuevaCantidad <= productoData.stock) {
+        // Si hay suficiente stock, actualizar cantidad
         productoEnCarrito.cantidad = nuevaCantidad;
         mostrarNotificacion(`Cantidad actualizada: ${nuevaCantidad}`, 'exito');
+    } else {
+        mostrarNotificacion('Stock no disponible', 'error');
+        return;
     }
     
     actualizarCarritoHTML();
+    actualizarStockVisual();
     guardarCarritoEnStorage();
 }
 
@@ -144,6 +160,13 @@ function actualizarCarrito(producto) {
     const productoData = products.find(p => p.id === producto.id);
     if (!productoData) return;
 
+    const cantidadEnCarrito = obtenerCantidadEnCarrito(producto.id);
+    
+    if (cantidadEnCarrito >= productoData.stock) {
+        mostrarNotificacion('Stock no disponible', 'error');
+        return;
+    }
+
     const productoExistente = productosCarrito.find(item => item.id === producto.id);
     
     if (productoExistente) {
@@ -153,6 +176,7 @@ function actualizarCarrito(producto) {
     }
 
     actualizarCarritoHTML();
+    actualizarStockVisual();
     guardarCarritoEnStorage();
 }
 
@@ -232,20 +256,32 @@ function actualizarCarritoHTML() {
                 </div>
                 <div class="carrito-acciones">
                     <button id="vaciar-carrito" class="button button-small">Vaciar</button>
+                    <button id="finalizar-compra" class="button button-primary button-small">Finalizar</button>
                 </div>
             </div>
         `;
 
-        // Actualizar event listener para el botón vaciar
+        // Actualizar event listeners para los botones vaciar y finalizar
         document.getElementById('vaciar-carrito').addEventListener('click', vaciarCarrito);
+        document.getElementById('finalizar-compra').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('¿Desea finalizar la compra?')) {
+                mostrarNotificacion('Compra finalizada con éxito', 'exito');
+                productosCarrito = [];
+                actualizarCarritoHTML();
+                actualizarStockVisual();
+                guardarCarritoEnStorage();
+            }
+        });
     }
 }
 
-
+// Esta función ha sido removida ya que no se requiere la funcionalidad de factura en PDF
 
 function vaciarCarrito() {
     productosCarrito = [];
     actualizarCarritoHTML();
+    actualizarStockVisual();
     guardarCarritoEnStorage();
     mostrarNotificacion('Carrito vaciado', 'error');
 }
@@ -254,6 +290,33 @@ function guardarCarritoEnStorage() {
     localStorage.setItem('carrito', JSON.stringify(productosCarrito));
 }
 
+function obtenerCantidadEnCarrito(productoId) {
+    const productoEnCarrito = productosCarrito.find(item => item.id === productoId);
+    return productoEnCarrito ? productoEnCarrito.cantidad : 0;
+}
 
-
-
+function actualizarStockVisual() {
+    document.querySelectorAll('.product-card').forEach(card => {
+        const button = card.querySelector('.agregar-carrito');
+        const stockInfo = card.querySelector('.stock-info');
+        const productoId = parseInt(button.getAttribute('data-id'));
+        const producto = products.find(p => p.id === productoId);
+        
+        if (producto) {
+            const cantidadEnCarrito = obtenerCantidadEnCarrito(productoId);
+            const stockDisponible = producto.stock - cantidadEnCarrito;
+            
+            stockInfo.innerHTML = stockDisponible > 0 
+                ? `<span>Stock disponible: ${stockDisponible} ${producto.unit}</span>`
+                : '<span class="agotado">Agotado</span>';
+                
+            stockInfo.className = `stock-info ${stockDisponible <= 5 ? 'stock-bajo' : ''}`;
+            
+            if (stockDisponible === 0) {
+                button.disabled = true;
+                button.classList.add('disabled');
+                button.textContent = 'Agotado';
+            }
+        }
+    });
+}
