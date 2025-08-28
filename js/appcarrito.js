@@ -29,6 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Agregar event listeners después de todo
     cargarEventListeners();
+
+    // Inicializar el manejo del carrito según el dispositivo
+    initializeCartBehavior();
 });
 
 // Función para cargar productos
@@ -66,6 +69,67 @@ function cargarProductos() {
         `;
         productosGrid.appendChild(div);
     });
+}
+
+function initializeCartBehavior() {
+    const carritoIcono = document.querySelector('.carrito-icono');
+    const carritoDropdown = document.querySelector('.carrito-dropdown');
+    const carritoOverlay = document.querySelector('.carrito-overlay');
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile) {
+        // En móviles, usar click para toggle
+        carritoIcono.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleCarrito();
+        });
+
+        // Cerrar al hacer click en el overlay
+        carritoOverlay.addEventListener('click', cerrarCarrito);
+
+        // Cerrar al hacer click fuera del carrito
+        document.addEventListener('click', (e) => {
+            if (!carritoDropdown.contains(e.target) && !carritoIcono.contains(e.target)) {
+                cerrarCarrito();
+            }
+        });
+
+        // Prevenir que clicks dentro del carrito lo cierren
+        carritoDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+
+    // Manejar cambios de tamaño de ventana
+    window.addEventListener('resize', () => {
+        const newIsMobile = window.innerWidth <= 768;
+        if (newIsMobile !== isMobile) {
+            location.reload(); // Recargar para aplicar el comportamiento correcto
+        }
+    });
+}
+
+function toggleCarrito() {
+    const carritoDropdown = document.querySelector('.carrito-dropdown');
+    const carritoOverlay = document.querySelector('.carrito-overlay');
+    const isOpen = carritoDropdown.classList.contains('show');
+
+    if (!isOpen) {
+        carritoDropdown.classList.add('show');
+        carritoOverlay.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    } else {
+        cerrarCarrito();
+    }
+}
+
+function cerrarCarrito() {
+    const carritoDropdown = document.querySelector('.carrito-dropdown');
+    const carritoOverlay = document.querySelector('.carrito-overlay');
+    
+    carritoDropdown.classList.remove('show');
+    carritoOverlay.classList.remove('show');
+    document.body.style.overflow = '';
 }
 
 function cargarEventListeners() {
