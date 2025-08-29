@@ -331,6 +331,7 @@ function actualizarCarritoHTML() {
             e.preventDefault();
             if (confirm('¿Desea finalizar la compra?')) {
                 mostrarNotificacion('Compra finalizada con éxito', 'exito');
+                mostrarFactura();
                 productosCarrito = [];
                 actualizarCarritoHTML();
                 actualizarStockVisual();
@@ -340,7 +341,138 @@ function actualizarCarritoHTML() {
     }
 }
 
-// Esta función ha sido removida ya que no se requiere la funcionalidad de factura en PDF
+function mostrarFactura() {
+    try {
+        // Validaciones iniciales
+        if (!window.jspdf) {
+            throw new Error('jsPDF no está disponible');
+        }
+        
+        if (!productosCarrito || productosCarrito.length === 0) {
+            alert('No hay productos en el carrito para facturar');
+            return;
+        }
+
+        if (typeof TASA_IMPUESTO === 'undefined') {
+            throw new Error('La tasa de impuestos no está definida');
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Configuración de página
+        const margenIzquierdo = 20;
+        const anchoMaximo = 170; // Para evitar desbordamiento
+        let yPosition = 20;
+
+        // Encabezado
+        doc.setFontSize(18);
+        doc.setFont(undefined, 'bold');
+        doc.text("Factura de Compra", margenIzquierdo, yPosition);
+
+        // Nombre de la tienda
+        yPosition += 10;    
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'normal');
+        doc.text("Mini tienda Don Bosco", margenIzquierdo, yPosition);
+
+        // No. de factura ramdom de 6 dígitos
+        const numeroFactura = Math.floor(100000 + Math.random() * 900000);
+        yPosition += 10;
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'normal');
+        doc.text(`No. de Factura: ${numeroFactura}`, margenIzquierdo, yPosition);
+        
+        // Fecha de compra
+        yPosition += 10;
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'normal');
+        doc.text(`Fecha: ${obtenerFechaActual()}`, margenIzquierdo, yPosition);
+        
+        yPosition += 20;
+
+        // Encabezados de tabla
+        doc.setFont(undefined, 'bold');
+        doc.text("Producto", margenIzquierdo, yPosition);
+        doc.text("Cant.", margenIzquierdo + 80, yPosition);
+        doc.text("Precio Unit.", margenIzquierdo + 105, yPosition);
+        doc.text("Subtotal", margenIzquierdo + 140, yPosition);
+        
+        yPosition += 10;
+        doc.setFont(undefined, 'normal');
+
+        // Línea separadora
+        doc.line(margenIzquierdo, yPosition, margenIzquierdo + anchoMaximo, yPosition);
+        yPosition += 5;
+
+        // Productos del carrito
+        productosCarrito.forEach((producto, index) => {
+            // Verificar si necesitamos una nueva página
+            if (yPosition > 250) {
+                doc.addPage();
+                yPosition = 20;
+            }
+
+            const precioNumerico = parseFloat(producto.precio.replace(/[$,]/g, ''));
+            if (isNaN(precioNumerico)) {
+                console.warn(`Precio inválido para ${producto.titulo}:`, producto.precio);
+                return;
+            }
+
+            const subtotalProducto = precioNumerico * producto.cantidad;
+            
+            // Truncar título si es muy largo
+            const tituloCorto = producto.titulo.length > 25 
+                ? producto.titulo.substring(0, 25) + '...' 
+                : producto.titulo;
+
+            doc.text(tituloCorto, margenIzquierdo, yPosition);
+            doc.text(producto.cantidad.toString(), margenIzquierdo + 85, yPosition);
+            doc.text(producto.precio, margenIzquierdo + 105, yPosition);
+            doc.text(formatearPrecio(subtotalProducto.toFixed(2)), margenIzquierdo + 140, yPosition);
+            
+            yPosition += 8;
+        });
+
+        // Línea separadora antes de totales
+        yPosition += 5;
+        doc.line(margenIzquierdo, yPosition, margenIzquierdo + anchoMaximo, yPosition);
+        yPosition += 15;
+
+        // Cálculos de totales
+        const subtotal = productosCarrito.reduce((total, producto) => {
+            const precio = parseFloat(producto.precio.replace(/[$,]/g, ''));
+            return total + (isNaN(precio) ? 0 : precio * producto.cantidad);
+        }, 0);
+        
+        const iva = subtotal * TASA_IMPUESTO;
+        const total = subtotal + iva;
+
+        // Mostrar totales alineados a la derecha
+        const xTotales = margenIzquierdo + 100;
+        doc.setFont(undefined, 'normal');
+        doc.text(`Subtotal: ${formatearPrecio(subtotal.toFixed(2))}`, xTotales, yPosition);
+        yPosition += 10;
+        
+        doc.text(`IVA (${(TASA_IMPUESTO * 100).toFixed(0)}%): ${formatearPrecio(iva.toFixed(2))}`, xTotales, yPosition);
+        yPosition += 10;
+        
+        doc.setFont(undefined, 'bold');
+        doc.text(`Total: ${formatearPrecio(total.toFixed(2))}`, xTotales, yPosition);
+
+        // Generar y mostrar PDF
+        const pdfBlob = doc.output("blob");
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        
+        // Abrir en nueva pestaña
+        const nuevaVentana = window.open(pdfUrl, "_blank");
+        console.log('Factura generada exitosamente');
+
+    } catch (error) {
+        console.error('Error al generar la factura:', error);
+        alert('Error al generar la factura. Por favor, intente nuevamente.');
+    }
+}
 
 function vaciarCarrito() {
     productosCarrito = [];
