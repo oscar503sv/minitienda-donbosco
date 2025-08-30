@@ -486,7 +486,7 @@ body {
     letter-spacing: 0.5px;
     padding: 1rem 2rem;
     height: auto;
-    width: 90%;
+    width: 100%;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -538,6 +538,12 @@ body {
 }
 
 #vaciar-carrito {
+    margin-top: 1rem;
+    background-color: #98e1a7;
+    border-color: #98e1a7;
+}
+
+#seguir-comprando {
     margin-top: 1rem;
     background-color: #98e1a7;
     border-color: #98e1a7;
@@ -680,10 +686,23 @@ body {
     color: var(--color-danger);
 }
 
+#seguir-comprando {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    color: #666;
+}
+
+#seguir-comprando:hover {
+    border-color: var(--color-secondary);
+    color: var(--color-secondary);
+}
+
+
 #finalizar-compra {
     background-color: var(--color-secondary);
     border-color: var(--color-secondary);
     color: var(--color-primary);
+    margin-top: 5px;
 }
 
 #finalizar-compra:hover {
