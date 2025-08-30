@@ -332,14 +332,24 @@ function actualizarCarritoHTML() {
         document.getElementById('finalizar-compra').addEventListener('click', (e) => {
             e.preventDefault();
             if (confirm('¿Desea finalizar la compra?')) {
-                mostrarNotificacion('Compra finalizada con éxito', 'exito');
+                // Actualizar el stock primero
+                productosCarrito.forEach(item => {
+                    const producto = products.find(p => p.id === item.id);
+                    if (producto) {
+                        producto.stock -= item.cantidad;
+                    }
+                });
+
+                // Mostrar factura
                 mostrarFactura();
+
+                // Limpiar carrito y mostrar notificación
                 productosCarrito = [];
                 actualizarCarritoHTML();
-                actualizarStockVisual();
                 guardarCarritoEnStorage();
-                // Redirigir a la página de productos
-                window.location.href = "index.html";
+                
+                mostrarNotificacion('Compra finalizada con éxito', 'exito');
+                cerrarCarrito();
             }
         });
         document.getElementById('seguir-comprando').addEventListener('click', (e) =>{window.location.href = "index.html";}); 
@@ -513,15 +523,17 @@ function actualizarStockVisual() {
                 
             stockInfo.className = `stock-info ${stockDisponible <= 5 ? 'stock-bajo' : ''}`;
             
+            // Actualizar el estado del botón según el stock disponible
             if (stockDisponible === 0) {
                 button.disabled = true;
                 button.classList.add('disabled');
-                button.textContent = 'Agotado'; 
-                
+                button.textContent = 'Agotado';
+            } else {
+                button.disabled = false;
+                button.classList.remove('disabled');
+                button.textContent = 'Agregar Al Carrito';
             }
-          
         }
     });
-
-    }
+}
 
