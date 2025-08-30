@@ -1,5 +1,6 @@
 const TASA_IMPUESTO = 0.13;
 
+
 // Selectores
 const carrito = document.querySelector('#carrito');
 const listaProductos = document.querySelector('#lista-productos');
@@ -320,8 +321,9 @@ function actualizarCarritoHTML() {
                 </div>
                 <div class="carrito-acciones">
                     <button id="vaciar-carrito" class="button button-small">Vaciar</button>
-                    <button id="finalizar-compra" class="button button-primary button-small">Finalizar</button>
+                    <button id="seguir-comprando" class="button button-small">Seguir comprando</button>
                 </div>
+                <div class="carrito-finalizar"><button id="finalizar-compra" class="button button-primary button-small">Finalizar</button></div>
             </div>
         `;
 
@@ -336,8 +338,11 @@ function actualizarCarritoHTML() {
                 actualizarCarritoHTML();
                 actualizarStockVisual();
                 guardarCarritoEnStorage();
+                // Redirigir a la página de productos
+                window.location.href = "index.html";
             }
         });
+        document.getElementById('seguir-comprando').addEventListener('click', (e) =>{window.location.href = "index.html";}); 
     }
 }
 
@@ -511,8 +516,12 @@ function actualizarStockVisual() {
             if (stockDisponible === 0) {
                 button.disabled = true;
                 button.classList.add('disabled');
-                button.textContent = 'Agotado';
+                button.textContent = 'Agotado'; 
+                
             }
+          
         }
     });
-}
+
+    }
+
